@@ -4,13 +4,13 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'label_factory/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "label_factory"
+  spec.name          = 'label_factory'
   spec.version       = LabelFactory::VERSION
-  spec.authors       = ["gagoar"]
-  spec.email         = ["xeroice@gmail.com"]
-  spec.description   = %q{TODO: Write a gem description}
-  spec.summary       = %q{TODO: Write a gem summary}
-  spec.homepage      = ""
+  spec.authors       = ['gagoar']
+  spec.email         = ['xeroice@gmail.com']
+  spec.description   = %q{pdf label creation in ruby}
+  spec.summary       = %q{http://github.com/eventioz/label_factory}
+  spec.homepage      = "http://github.com/eventioz/label_factory"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)
@@ -18,6 +18,10 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
-  spec.add_development_dependency "bundler", "~> 1.3"
+  s.add_dependency 'metaskills-pdf-writer'
+  s.add_dependency 'xml-mapping' , '0.8.1'
+
+  #development
+  spec.add_development_dependency "bundler", ">= 1.3"
   spec.add_development_dependency "rake"
 end
