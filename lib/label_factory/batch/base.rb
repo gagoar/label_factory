@@ -2,37 +2,41 @@ module LabelFactory
   module Batch
     class Base
 
+
       DEFAULTS = { justification: :left, font_size: 12, font_type: 'Helvetica' }
-      attr_accessor :template, :label, :pdf, :barcode_font, :manual_new_page
+      attr_accessor :template, :label, :pdf, :manual_new_page
       attr_reader :labels_per_page
 
       @@gt = nil
 
       def initialize(template_name, pdf_opts = {})
 
-        raise 'Template not found!' unless @template = gt.find_template(template_name)
-        #if the template specifies the paper type, and the user didn't use it.
-        pdf_opts[:paper] = @template.size.gsub(/^.*-/,'') if @template.size && !pdf_opts.has_key?(:paper)
-        #TODO figure out how to cope with multiple label types on a page
-        @label = @template.labels["0"]
-        #TODO figure out how to handle multiple layouts
-        @layout = @label.layouts[0]
-        @labels_per_page = [ @layout.nx, @layout.ny ].reduce(:*)
-        @zero_based_labels_per_page = @labels_per_page - 1
+        @template = gt.find_template(template_name)
 
-        # set font_dir if needed
-        font_dir = pdf_opts.delete(:font_dir)
-        PDF::Writer::FONT_PATH << font_dir if font_dir && ! PDF::Writer::FONT_PATH.include?( font_dir )
-        # set afm_dir if needed
-        afm_dir = pdf_opts.delete(:afm_dir)
-        PDF::Writer::FontMetrics::METRICS_PATH << afm_dir if afm_dir && ! PDF::Writer::FontMetrics::METRICS_PATH.include?( font_dir )
+        if @template
 
-        @pdf = PDF::Writer.new(pdf_opts)
-        @pdf.margins_pt(0, 0, 0, 0)
+          #if the template specifies the paper type, and the user didn't use it.
+          pdf_opts[:paper] = @template.size.gsub(/^.*-/,'') if @template.size && !pdf_opts.has_key?(:paper)
 
-        # Turn off print scaling in the generated PDF to ensure
-        # that the labels are positioned correctly when printing
-        # TODO This goes boom!        @pdf.viewer_preferences('PrintScaling', '/None')
+          @label = @template.labels['0']
+          @layout = @label.layouts.first
+          @labels_per_page = [ @layout.nx, @layout.ny ].reduce(:*)
+          @zero_based_labels_per_page = @labels_per_page - 1
+
+          # set font_dir if needed
+          font_dir = pdf_opts.delete(:font_dir)
+          PDF::Writer::FONT_PATH << font_dir if font_dir && ! PDF::Writer::FONT_PATH.include?( font_dir )
+          # set afm_dir if needed
+          afm_dir = pdf_opts.delete(:afm_dir)
+          PDF::Writer::FontMetrics::METRICS_PATH << afm_dir if afm_dir && ! PDF::Writer::FontMetrics::METRICS_PATH.include?( font_dir )
+
+          @pdf = PDF::Writer.new(pdf_opts)
+
+          @pdf.margins_pt(0, 0, 0, 0)
+
+        else
+          raise 'Template not found!'
+        end
       end
 
       def self.gt
@@ -44,7 +48,7 @@ module LabelFactory
       end
 
       def self.load_template_set(template_set_file=nil)
-        template_set_file ||= File.join(TEMPLATES_PATH, 'avery-us-templates.xml')
+        template_set_file ||= File.join(TEMPLATES_PATH, Template::Base::DEFAULT)
         @@gt = Template::Glabel.load_from_file(template_set_file)
       end
 
