@@ -32,30 +32,33 @@ module LabelFactory
         @template = gt.find_template(template_name)
 
         if @template
+          @label = @template.label
 
-          #if the template specifies the paper type, and the user didn't use it.
-          pdf_opts[:paper] = @template.size.gsub(/^.*-/,'') if @template.size && !pdf_opts.has_key?(:paper)
-
-          @label = @template.labels['0']
           @layout = @label.layouts.first
 
-          # set font_dir if needed
-          set_fonts(pdf_opts.delete(:font_dir)) if pdf_opts[:font_dir]
-          # set afm_dir if needed
-          set_afm_fonts(pdf_opts.delete(:afm_dir)) if pdf_opts[:afm_dir]
+          @pdf = PDF::Writer.new(set_options(pdf_opts))
 
-          @pdf = PDF::Writer.new(pdf_opts)
           @pdf.margins_pt(0, 0, 0, 0)
 
         else
           raise 'Template not found!'
         end
+
       end
 
-       def gt
+      def gt
         self.class.gt
       end
 
+      def set_options(opts = {})
+        opts[:paper] = @template.size.gsub(/^.*-/,'') if @template.size && ! opts[:paper]
+        # set font_dir if needed
+        set_fonts(opts.delete(:font_dir)) if opts[:font_dir]
+        # set afm_dir if needed
+        set_afm_fonts(opts.delete(:afm_dir)) if opts[:afm_dir]
+
+        opts
+      end
 =begin rdoc
       add_label takes an argument hash.
       [:position]  Which label slot to print.  Positions are top to bottom, left to right so position 1 is the label in the top lefthand corner.  Defaults to 0
