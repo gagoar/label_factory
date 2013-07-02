@@ -126,58 +126,6 @@ class TestPdfLabelBatch < Test::Unit::TestCase
     p.save_as("#{ROOT}/test_draw_boxes_output.pdf")
   end
 
-  def test_font_path
-    font_path = "#{ROOT}/fonts"
-    assert PDF::Writer::FontMetrics::METRICS_PATH.include?(font_path)
-    assert PDF::Writer::FONT_PATH.include?(font_path)
-  end
-
-  def test_set_and_get_barcode_font
-    p = LabelFactory::Batch::Base.new("Avery 8160") # label is 2 x 10
-    assert_equal "Code3de9.afm", p.barcode_font
-
-    assert p.barcode_font = "CodeDatamatrix.afm"
-    assert_equal "CodeDatamatrix.afm", p.barcode_font
-
-    assert_raise(RuntimeError) do
-      p.barcode_font = "CodeBob"
-    end
-    assert_equal "CodeDatamatrix.afm", p.barcode_font
-
-  end
-
-  def test_add_barcode_label
-    p = LabelFactory::Batch::Base.new("Avery 8160") # label is 2 x 2
-    i = 0
-    LabelFactory::Batch::Base.all_barcode_fonts.each_key do |font_name|
-      p.barcode_font = font_name
-      text = font_name.to_s.dup
-      p.add_label(text, position: i)
-      i += 1
-      p.add_barcode_label(bar_text: "Hello", bar_size: 32, text: "HELLO", position: i)
-      i += 1
-      p.add_barcode_label(text: '*1234567890*', position: i, bar_size: 32)
-      i += 1
-    end
-    p.save_as("#{ROOT}/test_barcode_output.pdf")
-  end
-
-  def test_code39
-    p = LabelFactory::Batch::Base.new("Avery 8160") # label is 2 x 2
-    assert_equal '*HELLO123*', p.code39("hellO123")
-  end
-
-  def test_label_information
-    templates = LabelFactory::Batch::Base.all_templates
-    assert templates.size > 0
-    t = templates.first
-    assert_equal 'Avery 5160', t.name
-    assert_equal 3, t.nx
-    assert_equal 10, t.ny
-    assert_equal 'US-Letter', t.size
-    assert_equal 'Address Labels', t.find_description
-  end
-
   def test_label_information_no_crash
     LabelFactory::Batch::Base.all_templates.each do |t|
       t.nx
