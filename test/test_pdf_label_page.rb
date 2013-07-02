@@ -1,8 +1,6 @@
 # encoding: utf-8
 require 'test/unit'
-require '/Users/gagoar/workspace/label_factory/lib/label_factory'
-require 'pry'
-require 'pry-nav'
+require 'label_factory'
 
 class TestPdfLabelBatch < Test::Unit::TestCase
   ROOT = File.expand_path(File.dirname(__FILE__) + "/../")
