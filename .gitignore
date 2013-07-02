@@ -1,3 +1,4 @@
+*.pdf
 .rbenv-version
 *.gem
 *.rbc
