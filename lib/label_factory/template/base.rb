@@ -3,6 +3,8 @@ module LabelFactory
     class Base
       include XML::Mapping
 
+      DEFAULT = 'avery-us-templates.xml'
+
       attr_accessor :labels
 
       text_node   :name,         '@name'
@@ -14,9 +16,9 @@ module LabelFactory
       length_node :height,       '@height',       default_value: nil
 
       #TODO this could be cleaner, but I'm not sure how yet
-      hash_node :Rectangles, 'rectangle', '@id', class: Label::Rectangle, default_value: nil
-      hash_node :Rounds,     'round',     '@id', class: Label::Round,     default_value: nil
-      hash_node :CDs,        'cd',        '@id', class: Label::Cd,        default_value: nil
+      hash_node :rectangles, 'Label-rectangle', '@id', class: Label::Rectangle, default_value: nil
+      hash_node :rounds,     'Label-round',     '@id', class: Label::Round,     default_value: nil
+      hash_node :cds,        'Label-cd',        '@id', class: Label::Cd,        default_value: nil
 
       hash_node :alias, 'Alias', '@name', class: Label::Alias, default_value: Hash.new
 
@@ -25,7 +27,7 @@ module LabelFactory
       end
 
       def labels
-        @labels ||= [ @Rectangles, @Rounds, @CDs ].reduce(:merge)
+        @labels ||= [ @rectangles, @rounds, @cds ].reduce(:merge)
       end
 
       def nx
