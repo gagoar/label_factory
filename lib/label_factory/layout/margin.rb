@@ -4,8 +4,6 @@ module LabelFactory
     	include XML::Mapping
 
     	length_node :size, '@size'
-
     end
-
   end
 end
