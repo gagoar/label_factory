@@ -1,5 +1,5 @@
 # LabelFactory
-
+[![Gem Version](https://badge.fury.io/rb/label_factory.png)](https://rubygems.org/gems/label_factory)[![Code Climate](https://codeclimate.com/github/eventioz/label_factory.png)](https://codeclimate.com/github/eventioz/label_factory)[![Dependency Status](https://gemnasium.com/eventioz/label_factory.png)](https://gemnasium.com/eventioz/label_factory)
 create pdf labels with pure ruby
 
 you can load your templates in [Glabels](http://www.glabels.org/) format or use the ones that we have already included
