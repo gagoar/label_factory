@@ -3,6 +3,7 @@ require 'xml/mapping'
 require 'xml/mapping/base'
 
 module LabelFactory
+
   Encoding.default_external = Encoding::UTF_8
   Encoding.default_internal = Encoding::UTF_8
 
@@ -11,6 +12,7 @@ module LabelFactory
   LABEL_PATH        = File.join(LIBRARY_PATH, 'label')
   LAYOUT_PATH       = File.join(LIBRARY_PATH, 'layout')
   TEMPLATE_PATH     = File.join(LIBRARY_PATH, 'template')
+  UTIL_PATH         = File.join(LIBRARY_PATH, 'util')
   TEMPLATES_PATH    = File.expand_path('../../templates', __FILE__)
 
   module Batch
@@ -35,9 +37,11 @@ module LabelFactory
     autoload :Margin,    File.join(LAYOUT_PATH, 'margin')
     autoload :Line,      File.join(LAYOUT_PATH, 'line')
     autoload :Circle,    File.join(LAYOUT_PATH, 'circle')
+    autoload :Length,    File.join(LAYOUT_PATH, 'length')
   end
 
 
  require File.join(LIBRARY_PATH, 'version')
- require File.join(LAYOUT_PATH, 'length')
+ require File.join(UTIL_PATH, 'length_node')
+
 end
