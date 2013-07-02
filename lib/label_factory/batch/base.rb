@@ -2,12 +2,30 @@ module LabelFactory
   module Batch
     class Base
 
-
       DEFAULTS = { justification: :left, font_size: 12, font_type: 'Helvetica' }
       attr_accessor :template, :label, :pdf, :manual_new_page
-      attr_reader :labels_per_page
 
       @@gt = nil
+
+      class << self
+        def gt
+          @@gt || self.load_template_set
+        end
+
+        def load_template_set(template_set_file = nil)
+          template_set_file ||= File.join(TEMPLATES_PATH, Template::Base::DEFAULT)
+          @@gt = Template::Glabel.load_from_file(template_set_file)
+        end
+
+        def all_template_names
+          gt.all_avaliable_templates
+        end
+
+        def all_templates
+          gt.templates.values
+        end
+      end
+
 
       def initialize(template_name, pdf_opts = {})
 
@@ -20,18 +38,13 @@ module LabelFactory
 
           @label = @template.labels['0']
           @layout = @label.layouts.first
-          @labels_per_page = [ @layout.nx, @layout.ny ].reduce(:*)
-          @zero_based_labels_per_page = @labels_per_page - 1
 
           # set font_dir if needed
-          font_dir = pdf_opts.delete(:font_dir)
-          PDF::Writer::FONT_PATH << font_dir if font_dir && ! PDF::Writer::FONT_PATH.include?( font_dir )
+          set_fonts(pdf_opts.delete(:font_dir)) if pdf_opts[:font_dir]
           # set afm_dir if needed
-          afm_dir = pdf_opts.delete(:afm_dir)
-          PDF::Writer::FontMetrics::METRICS_PATH << afm_dir if afm_dir && ! PDF::Writer::FontMetrics::METRICS_PATH.include?( font_dir )
+          set_afm_fonts(pdf_opts.delete(:afm_dir)) if pdf_opts[:afm_dir]
 
           @pdf = PDF::Writer.new(pdf_opts)
-
           @pdf.margins_pt(0, 0, 0, 0)
 
         else
@@ -39,25 +52,8 @@ module LabelFactory
         end
       end
 
-      def self.gt
-        @@gt || self.load_template_set
-      end
-
-      def gt
+       def gt
         self.class.gt
-      end
-
-      def self.load_template_set(template_set_file=nil)
-        template_set_file ||= File.join(TEMPLATES_PATH, Template::Base::DEFAULT)
-        @@gt = Template::Glabel.load_from_file(template_set_file)
-      end
-
-      def self.all_template_names
-        gt.all_avaliable_templates
-      end
-
-      def self.all_templates
-        gt.templates.values
       end
 
 =begin rdoc
@@ -69,6 +65,16 @@ module LabelFactory
       [:justification] Values can be :left, :right, :center, :full.  Defaults to :left
       [:offset_x, offset_y] If your printer doesn't want to print with out margins you can define these values to fine tune printout.
 =end
+
+       def set_fonts(font_dir = nil)
+          PDF::Writer::FONT_PATH << font_dir if font_dir && ! PDF::Writer::FONT_PATH.include?( font_dir )
+       end
+
+       def set_afm_fonts(afm_dir = nil)
+         PDF::Writer::FontMetrics::METRICS_PATH << afm_dir if afm_dir && ! PDF::Writer::FontMetrics::METRICS_PATH.include?( afm_dir )
+       end
+
+
 
       def add_label(text, options = {})
         unless options.delete(:skip)
@@ -205,8 +211,8 @@ module LabelFactory
       def setup_add_label_options(options)
         if position = options[:position]
           # condition to handle multi-page PDF generation. If true, we're past the first page
-          if position > @zero_based_labels_per_page
-            position = position % @labels_per_page
+          if position > @layout.zero_base_per_page
+            position = position % @layout.per_page
             # if remainder is zero, we're dealing with the first label of a new page
             @pdf.new_page if ( position.zero? && manual_new_page.nil? )
           end

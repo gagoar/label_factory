@@ -42,9 +42,9 @@ module LabelFactory
         _description || description
       end
 
-      private
+     private
 
-      def first_layout
+     def first_layout
         label = labels['0']
         label.layouts.first if label
       end

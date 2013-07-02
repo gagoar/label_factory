@@ -10,8 +10,8 @@ Gem::Specification.new do |spec|
   spec.email         = ['xeroice@gmail.com']
   spec.description   = %q{pdf label creation in ruby}
   spec.summary       = %q{http://github.com/eventioz/label_factory}
-  spec.homepage      = "http://github.com/eventioz/label_factory"
-  spec.license       = "MIT"
+  spec.homepage      = %q{http://github.com/eventioz/label_factory}
+  spec.license       = %q{MIT}
 
   spec.files         = `git ls-files`.split($/)
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
