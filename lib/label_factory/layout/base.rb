@@ -19,7 +19,12 @@ module LabelFactory
       def zero_base_per_page
         per_page - 1
       end
-   end
+
+      def as_pts(attr = nil)
+        self.public_send(attr.to_s).as_pts if attr
+      end
+
+    end
   end
 end
 
