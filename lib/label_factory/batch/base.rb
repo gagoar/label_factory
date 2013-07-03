@@ -202,15 +202,19 @@ module LabelFactory
       end
 
       def get_label_x_position(x)
-        label_x  = [ @pdf.absolute_left_margin, @pdf.left_margin ].reduce(:-)
-        label_x += @layout.x0.as_pts
-        label_x += [ x, @layout.dx.as_pts ].reduce(:*)
+        get_left_label_position + [ x, @layout.as_pts(:dx) ].reduce(:*)
       end
 
       def get_label_y_position(y)
-        label_y  = [ @pdf.absolute_top_margin, @pdf.top_margin ].reduce(:+)
-        label_y -= @layout.y0.as_pts
-        label_y -= [ y, @layout.dy.as_pts ].reduce(:*)
+        get_top_label_position - [ y, @layout.as_pts(:dy) ].reduce(:*)
+      end
+
+      def get_left_label_position
+         [ @pdf.absolute_left_margin, @pdf.left_margin ].reduce(:-) + @layout.as_pts(:x0)
+      end
+
+      def get_top_label_position
+         [ @pdf.absolute_top_margin, @pdf.top_margin ].reduce(:+) - @layout.as_pts(:y0)
       end
 
       def setup_add_label_options(options)
