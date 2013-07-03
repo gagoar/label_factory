@@ -25,8 +25,19 @@ module LabelFactory
       end
 
       def all_avaliable_templates
-        templates.values.map(&:name) + templates.values.map(&:alias).map(&:keys).flatten
+        all_templates_names + all_templates_alias_names
       end
+
+      private
+
+      def all_templates_names
+        templates.values.map(&:name)
+      end
+
+      def all_templates_alias_names
+        templates.values.map(&:alias).map(&:keys).flatten
+      end
+
     end
   end
 end
