@@ -201,25 +201,13 @@ module LabelFactory
           label_x, label_y = position_to_x_y(0) unless ( label_x = options[:x] ) && ( label_y = options[:y] )
         end
 
-        label_width = label_x + @label.width.as_pts
+        label_x, label_y, label_width = @label.without_margins(label_x, label_y) unless options[:use_margin]
 
-        if options[:use_margin].nil?
-          @label.markupMargins.each do |margin|
-            label_x += margin.size.as_pts
-            label_y -= margin.size.as_pts
-            label_width -= margin.size.as_pts
-          end
-        end
-
-        if options[:offset_x]
-          label_x += options[:offset_x]
-          label_width += options[:offset_x]
-        end
+        [label_x, label_width].each { |measure| measure += options[:offset_x] } if options[:offset_x]
 
         label_y += options[:offset_y] if options[:offset_y]
 
         [ label_x, label_y, label_width ]
-
       end
 
       def setup(label_x, label_width, options)
