@@ -17,6 +17,47 @@ module LabelFactory
         @markups ||= [@markupMargins, @markupLines, @markupCircles ].reduce(:merge)
       end
 
+      def draw_markups!(pdf_instance = nil, box_x, box_y)
+        if pdf_instance
+          draw_margins!(pdf_instance, box_x, box_y)
+          draw_lines!(pdf_instance, box_x, box_y)
+        end
+      end
+
+      def without_margins(x, y, offset_x = nil)
+        width = x + self.width.as_pts
+        width += offset_x if offset_x
+        @markupMargins.each do |margin|
+          x += margin.size.as_pts
+          y -= margin.size.as_pts
+          width -= margin.size.as_pts
+        end
+        [x, y, width]
+      end
+
+      private
+
+      def draw_margins!(pdf_instance = nil, box_x, box_y)
+          @markupMargins.each do |margin|
+            pdf_instance.rounded_rectangle( box_x + margin.size.as_pts, box_y - margin.size.as_pts,
+                                           width_size(margin), height_size(margin), round.as_pts ).stroke
+          end
+      end
+
+      def draw_lines!(pdf_instance = nil, box_x, box_y)
+          @markupLines.each do |line|
+            pdf_instance.line(box_x + line.x1.as_pts, box_y + line.y1.as_pts,
+                              box_x + line.x2.as_pts, box_y + line.y2.as_pts).stroke
+          end
+      end
+
+      def width_size(margin)
+        width.as_pts - [2,margin.size.as_pts].reduce(:*)
+      end
+
+      def height_size(margin)
+        height.as_pts - [2, margin.size.as_pts].reduce(:*)
+      end
     end
   end
 end

@@ -25,21 +25,16 @@ module LabelFactory
   end
 
   module Label
-    autoload :Base,      File.join(LABEL_PATH, 'base')
-    autoload :Alias,     File.join(LABEL_PATH, 'alias')
-    autoload :Cd,        File.join(LABEL_PATH, 'cd')
-    autoload :Round,     File.join(LABEL_PATH, 'round')
-    autoload :Rectangle, File.join(LABEL_PATH, 'rectangle')
+    %w(base alias cd round rectangle).each do |lib|
+      autoload lib.capitalize.to_sym, File.join(LABEL_PATH, lib)
+    end
   end
 
   module Layout
-    autoload :Base,      File.join(LAYOUT_PATH, 'Base')
-    autoload :Margin,    File.join(LAYOUT_PATH, 'margin')
-    autoload :Line,      File.join(LAYOUT_PATH, 'line')
-    autoload :Circle,    File.join(LAYOUT_PATH, 'circle')
-    autoload :Length,    File.join(LAYOUT_PATH, 'length')
+    %w(base margin line circle length).each do |lib|
+      autoload lib.capitalize.to_sym, File.join(LAYOUT_PATH, lib)
+    end
   end
-
 
  require File.join(LIBRARY_PATH, 'version')
  require File.join(UTIL_PATH, 'length_node')

@@ -2,64 +2,63 @@ module LabelFactory
   module Batch
     class Base
 
-
       DEFAULTS = { justification: :left, font_size: 12, font_type: 'Helvetica' }
       attr_accessor :template, :label, :pdf, :manual_new_page
-      attr_reader :labels_per_page
 
       @@gt = nil
+
+      class << self
+        def gt
+          @@gt || self.load_template_set
+        end
+
+        def load_template_set(template_set_file = nil)
+          template_set_file ||= File.join(TEMPLATES_PATH, Template::Base::DEFAULT)
+          @@gt = Template::Glabel.load_from_file(template_set_file)
+        end
+
+        def all_template_names
+          gt.all_avaliable_templates
+        end
+
+        def all_templates
+          gt.templates.values
+        end
+      end
+
 
       def initialize(template_name, pdf_opts = {})
 
         @template = gt.find_template(template_name)
 
         if @template
+          @label = @template.label
 
-          #if the template specifies the paper type, and the user didn't use it.
-          pdf_opts[:paper] = @template.size.gsub(/^.*-/,'') if @template.size && !pdf_opts.has_key?(:paper)
-
-          @label = @template.labels['0']
           @layout = @label.layouts.first
-          @labels_per_page = [ @layout.nx, @layout.ny ].reduce(:*)
-          @zero_based_labels_per_page = @labels_per_page - 1
 
-          # set font_dir if needed
-          font_dir = pdf_opts.delete(:font_dir)
-          PDF::Writer::FONT_PATH << font_dir if font_dir && ! PDF::Writer::FONT_PATH.include?( font_dir )
-          # set afm_dir if needed
-          afm_dir = pdf_opts.delete(:afm_dir)
-          PDF::Writer::FontMetrics::METRICS_PATH << afm_dir if afm_dir && ! PDF::Writer::FontMetrics::METRICS_PATH.include?( font_dir )
-
-          @pdf = PDF::Writer.new(pdf_opts)
+          @pdf = PDF::Writer.new(set_options(pdf_opts))
 
           @pdf.margins_pt(0, 0, 0, 0)
 
         else
           raise 'Template not found!'
         end
-      end
 
-      def self.gt
-        @@gt || self.load_template_set
       end
 
       def gt
         self.class.gt
       end
 
-      def self.load_template_set(template_set_file=nil)
-        template_set_file ||= File.join(TEMPLATES_PATH, Template::Base::DEFAULT)
-        @@gt = Template::Glabel.load_from_file(template_set_file)
-      end
+      def set_options(opts = {})
+        opts[:paper] = @template.size.gsub(/^.*-/,'') if @template.size && ! opts[:paper]
+        # set font_dir if needed
+        set_fonts(opts.delete(:font_dir)) if opts[:font_dir]
+        # set afm_dir if needed
+        set_afm_fonts(opts.delete(:afm_dir)) if opts[:afm_dir]
 
-      def self.all_template_names
-        gt.all_avaliable_templates
+        opts
       end
-
-      def self.all_templates
-        gt.templates.values
-      end
-
 =begin rdoc
       add_label takes an argument hash.
       [:position]  Which label slot to print.  Positions are top to bottom, left to right so position 1 is the label in the top lefthand corner.  Defaults to 0
@@ -69,6 +68,13 @@ module LabelFactory
       [:justification] Values can be :left, :right, :center, :full.  Defaults to :left
       [:offset_x, offset_y] If your printer doesn't want to print with out margins you can define these values to fine tune printout.
 =end
+      def set_fonts(font_dir = nil)
+        PDF::Writer::FONT_PATH << font_dir if font_dir && ! PDF::Writer::FONT_PATH.include?( font_dir )
+      end
+
+      def set_afm_fonts(afm_dir = nil)
+        PDF::Writer::FontMetrics::METRICS_PATH << afm_dir if afm_dir && ! PDF::Writer::FontMetrics::METRICS_PATH.include?( afm_dir )
+      end
 
       def add_label(text, options = {})
         unless options.delete(:skip)
@@ -124,49 +130,10 @@ module LabelFactory
         end
       end
 
-=begin rdoc
-      To facilitate aligning a printer we give a method that prints the outlines of the labels
-=end
-      def do_draw_boxes(write_coord = true, draw_markups = true)
-        @layout.nx.times do |x|
-          @layout.ny.times do |y|
-            box_x, box_y = get_x_y(x, y)
-            @pdf.rounded_rectangle(box_x,
-                                   box_y,
-                                   @label.width.as_pts,
-                                   @label.height.as_pts,
-                                   @label.round.as_pts).stroke
-            if write_coord
-              text = "#{box_x / 72}, #{box_y / 72}, #{@label.width.number}, #{label.height.number}"
-              add_label(text, x: box_x, y: box_y )
-            end
-
-            if draw_markups
-              @label.markupMargins.each do |margin|
-                size = margin.size.as_pts
-                @pdf.rounded_rectangle(box_x + size,
-                                       box_y - margin.size.as_pts,
-                                       @label.width.as_pts - 2*size,
-                                       @label.height.as_pts - 2*size,
-                                       @label.round.as_pts).stroke
-              end
-              @label.markupLines.each do |line|
-                @pdf.line(box_x + line.x1.as_pts,
-                          box_y + line.y1.as_pts,
-                          box_x + line.x2.as_pts,
-                          box_y + line.y2.as_pts).stroke
-              end
-            end
-          end
-        end
-      end
-
-      private :do_draw_boxes
-
       def draw_boxes(write_coord = true, draw_markups = true)
         pdf.open_object do |heading|
           pdf.save_state
-          do_draw_boxes(write_coord, draw_markups)
+          do_draw_boxes!(write_coord, draw_markups)
           pdf.restore_state
           pdf.close_object
           pdf.add_object(heading, :all_pages)
@@ -177,63 +144,65 @@ module LabelFactory
         @pdf.save_as(file_name)
       end
 
-      protected
+      private
+=begin rdoc
+      To facilitate aligning a printer we give a method that prints the outlines of the labels
+=end
+      def do_draw_boxes!(write_coord = true, draw_markups = true)
+        @layout.nx.times do |x|
+          @layout.ny.times do |y|
+            box_x, box_y = get_x_y(x, y)
+            @pdf.rounded_rectangle(box_x, box_y, @label.width.as_pts, @label.height.as_pts, @label.round.as_pts).stroke
+            add_label('', x: box_x, y: box_y ) if write_coord
+            @label.draw_markups!(@pdf, box_x, box_y) if draw_markups
+          end
+        end
+      end
 
 =begin rdoc
       Position is top to bottom, left to right, starting at 1 and ending at the end of the page
 =end
-      def position_to_x_y(position)
-        x = (position * 1.0 / @layout.ny).floor
-        y = position % @layout.ny
+      def position_to_x_y(options = {})
+        position = options[:position]
+        if position && position > @layout.labels_base_per_page
+          position = position % @layout.labels_per_page
+          @pdf.new_page if position.zero? && !manual_new_page
+        end
+        x = options[:x] || @layout.get_x(position)
+        y = options[:y] || @layout.get_y(position)
+        x += options[:offset_x] if options[:offset_x]
+        y += options[:offset_y] if options[:offset_y]
         get_x_y(x, y)
       end
 
       def get_x_y(x, y)
-        label_y = @pdf.absolute_top_margin
-        label_y += @pdf.top_margin
-        label_y -= @layout.y0.as_pts
-        label_y -= [y, @layout.dy.as_pts].reduce(:*)
+        [ get_label_x_position(x), get_label_y_position(y) ]
+      end
 
-        label_x = @pdf.absolute_left_margin
-        label_x -=  @pdf.left_margin
-        label_x +=  @layout.x0.as_pts
-        label_x +=  [x, @layout.dx.as_pts ].reduce(:*)
+      def get_label_x_position(x)
+        get_left_label_position + [ x, @layout.as_pts(:dx) ].reduce(:*)
+      end
 
-        [ label_x, label_y ]
+      def get_label_y_position(y)
+        get_top_label_position - [ y, @layout.as_pts(:dy) ].reduce(:*)
+      end
+
+      def get_left_label_position
+        [ @pdf.absolute_left_margin, @pdf.left_margin ].reduce(:-) + @layout.as_pts(:x0)
+      end
+
+      def get_top_label_position
+        [ @pdf.absolute_top_margin, @pdf.top_margin ].reduce(:+) - @layout.as_pts(:y0)
       end
 
       def setup_add_label_options(options)
-        if position = options[:position]
-          # condition to handle multi-page PDF generation. If true, we're past the first page
-          if position > @zero_based_labels_per_page
-            position = position % @labels_per_page
-            # if remainder is zero, we're dealing with the first label of a new page
-            @pdf.new_page if ( position.zero? && manual_new_page.nil? )
-          end
-          label_x, label_y = position_to_x_y(position)
-        else
-          label_x, label_y = position_to_x_y(0) unless ( label_x = options[:x] ) && ( label_y = options[:y] )
-        end
 
-        label_width = label_x + @label.width.as_pts
+        label_x, label_y = position_to_x_y(options)
 
-        if options[:use_margin].nil?
-          @label.markupMargins.each do |margin|
-            label_x += margin.size.as_pts
-            label_y -= margin.size.as_pts
-            label_width -= margin.size.as_pts
-          end
-        end
 
-        if options[:offset_x]
-          label_x += options[:offset_x]
-          label_width += options[:offset_x]
-        end
-
-        label_y +=  options[:offset_y] if options[:offset_y]
+        label_x, label_y, label_width = @label.without_margins(label_x, label_y, options[:offset_x]) unless options[:use_margin]
 
         [ label_x, label_y, label_width ]
-
       end
 
       def setup(label_x, label_width, options)

@@ -42,12 +42,15 @@ module LabelFactory
         _description || description
       end
 
-      private
-
       def first_layout
         label = labels['0']
         label.layouts.first if label
       end
+
+      def label
+        labels['0']
+      end
+
     end
   end
 end
