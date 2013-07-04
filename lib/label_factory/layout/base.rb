@@ -12,12 +12,12 @@ module LabelFactory
     	length_node :dx, '@dx', default_value: '0 pt'
     	length_node :dy, '@dy', default_value: '0 pt'
 
-      def per_page
+      def labels_per_page
         [nx, ny].reduce(:*)
       end
 
-      def zero_base_per_page
-        per_page - 1
+      def labels_base_per_page
+        labels_per_page - 1
       end
 
       def as_pts(attr = nil)

@@ -191,8 +191,8 @@ module LabelFactory
       def setup_add_label_options(options)
         if position = options[:position]
           # condition to handle multi-page PDF generation. If true, we're past the first page
-          if position > @layout.zero_base_per_page
-            position = position % @layout.per_page
+          if position > @layout.labels_base_per_page
+            position = position % @layout.labels_per_page
             # if remainder is zero, we're dealing with the first label of a new page
             @pdf.new_page if ( position.zero? && manual_new_page.nil? )
           end
