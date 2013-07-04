@@ -68,16 +68,13 @@ module LabelFactory
       [:justification] Values can be :left, :right, :center, :full.  Defaults to :left
       [:offset_x, offset_y] If your printer doesn't want to print with out margins you can define these values to fine tune printout.
 =end
+      def set_fonts(font_dir = nil)
+        PDF::Writer::FONT_PATH << font_dir if font_dir && ! PDF::Writer::FONT_PATH.include?( font_dir )
+      end
 
-       def set_fonts(font_dir = nil)
-          PDF::Writer::FONT_PATH << font_dir if font_dir && ! PDF::Writer::FONT_PATH.include?( font_dir )
-       end
-
-       def set_afm_fonts(afm_dir = nil)
-         PDF::Writer::FontMetrics::METRICS_PATH << afm_dir if afm_dir && ! PDF::Writer::FontMetrics::METRICS_PATH.include?( afm_dir )
-       end
-
-
+      def set_afm_fonts(afm_dir = nil)
+        PDF::Writer::FontMetrics::METRICS_PATH << afm_dir if afm_dir && ! PDF::Writer::FontMetrics::METRICS_PATH.include?( afm_dir )
+      end
 
       def add_label(text, options = {})
         unless options.delete(:skip)
@@ -133,49 +130,10 @@ module LabelFactory
         end
       end
 
-=begin rdoc
-      To facilitate aligning a printer we give a method that prints the outlines of the labels
-=end
-      def do_draw_boxes(write_coord = true, draw_markups = true)
-        @layout.nx.times do |x|
-          @layout.ny.times do |y|
-            box_x, box_y = get_x_y(x, y)
-            @pdf.rounded_rectangle(box_x,
-                                   box_y,
-                                   @label.width.as_pts,
-                                   @label.height.as_pts,
-                                   @label.round.as_pts).stroke
-            if write_coord
-              text = "#{box_x / 72}, #{box_y / 72}, #{@label.width.number}, #{label.height.number}"
-              add_label(text, x: box_x, y: box_y )
-            end
-
-            if draw_markups
-              @label.markupMargins.each do |margin|
-                size = margin.size.as_pts
-                @pdf.rounded_rectangle(box_x + size,
-                                       box_y - margin.size.as_pts,
-                                       @label.width.as_pts - 2*size,
-                                       @label.height.as_pts - 2*size,
-                                       @label.round.as_pts).stroke
-              end
-              @label.markupLines.each do |line|
-                @pdf.line(box_x + line.x1.as_pts,
-                          box_y + line.y1.as_pts,
-                          box_x + line.x2.as_pts,
-                          box_y + line.y2.as_pts).stroke
-              end
-            end
-          end
-        end
-      end
-
-      private :do_draw_boxes
-
       def draw_boxes(write_coord = true, draw_markups = true)
         pdf.open_object do |heading|
           pdf.save_state
-          do_draw_boxes(write_coord, draw_markups)
+          do_draw_boxes!(write_coord, draw_markups)
           pdf.restore_state
           pdf.close_object
           pdf.add_object(heading, :all_pages)
@@ -186,7 +144,20 @@ module LabelFactory
         @pdf.save_as(file_name)
       end
 
-      protected
+      private
+=begin rdoc
+      To facilitate aligning a printer we give a method that prints the outlines of the labels
+=end
+      def do_draw_boxes!(write_coord = true, draw_markups = true)
+        @layout.nx.times do |x|
+          @layout.ny.times do |y|
+            box_x, box_y = get_x_y(x, y)
+            @pdf.rounded_rectangle(box_x, box_y, @label.width.as_pts, @label.height.as_pts, @label.round.as_pts).stroke
+            add_label('', x: box_x, y: box_y ) if write_coord
+            @label.draw_markups!(@pdf, box_x, box_y) if draw_markups
+          end
+        end
+      end
 
 =begin rdoc
       Position is top to bottom, left to right, starting at 1 and ending at the end of the page
@@ -210,11 +181,11 @@ module LabelFactory
       end
 
       def get_left_label_position
-         [ @pdf.absolute_left_margin, @pdf.left_margin ].reduce(:-) + @layout.as_pts(:x0)
+        [ @pdf.absolute_left_margin, @pdf.left_margin ].reduce(:-) + @layout.as_pts(:x0)
       end
 
       def get_top_label_position
-         [ @pdf.absolute_top_margin, @pdf.top_margin ].reduce(:+) - @layout.as_pts(:y0)
+        [ @pdf.absolute_top_margin, @pdf.top_margin ].reduce(:+) - @layout.as_pts(:y0)
       end
 
       def setup_add_label_options(options)
@@ -245,7 +216,7 @@ module LabelFactory
           label_width += options[:offset_x]
         end
 
-        label_y +=  options[:offset_y] if options[:offset_y]
+        label_y += options[:offset_y] if options[:offset_y]
 
         [ label_x, label_y, label_width ]
 
