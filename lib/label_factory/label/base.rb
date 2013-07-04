@@ -24,6 +24,16 @@ module LabelFactory
         end
       end
 
+      def without_margins(x, y)
+        width = x + self.width.as_pts
+        @markupMargins.each do |margin|
+          x += margin.size.as_pts
+          y -= margin.size.as_pts
+          width -= margin.size.as_pts
+        end
+        [x, y, width]
+      end
+
       private
 
       def draw_margins!(pdf_instance = nil, box_x, box_y)
