@@ -24,8 +24,9 @@ module LabelFactory
         end
       end
 
-      def without_margins(x, y)
+      def without_margins(x, y, offset_x = nil)
         width = x + self.width.as_pts
+        width += offset_x if offset_x
         @markupMargins.each do |margin|
           x += margin.size.as_pts
           y -= margin.size.as_pts

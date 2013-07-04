@@ -24,6 +24,14 @@ module LabelFactory
         self.public_send(attr.to_s).as_pts if attr
       end
 
+      def get_x(position = 0)
+        (position * 1.0 / ny).floor
+      end
+
+      def get_y(position = 0)
+        position % ny
+      end
+
     end
   end
 end

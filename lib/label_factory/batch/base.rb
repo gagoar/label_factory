@@ -162,9 +162,16 @@ module LabelFactory
 =begin rdoc
       Position is top to bottom, left to right, starting at 1 and ending at the end of the page
 =end
-      def position_to_x_y(position)
-        x = (position * 1.0 / @layout.ny).floor
-        y = position % @layout.ny
+      def position_to_x_y(options = {})
+        position = options[:position]
+        if position && position > @layout.labels_base_per_page
+          position = position % @layout.labels_per_page
+          @pdf.new_page if position.zero? && !manual_new_page
+        end
+        x = options[:x] || @layout.get_x(position)
+        y = options[:y] || @layout.get_y(position)
+        x += options[:offset_x] if options[:offset_x]
+        y += options[:offset_y] if options[:offset_y]
         get_x_y(x, y)
       end
 
@@ -189,23 +196,11 @@ module LabelFactory
       end
 
       def setup_add_label_options(options)
-        if position = options[:position]
-          # condition to handle multi-page PDF generation. If true, we're past the first page
-          if position > @layout.labels_base_per_page
-            position = position % @layout.labels_per_page
-            # if remainder is zero, we're dealing with the first label of a new page
-            @pdf.new_page if ( position.zero? && manual_new_page.nil? )
-          end
-          label_x, label_y = position_to_x_y(position)
-        else
-          label_x, label_y = position_to_x_y(0) unless ( label_x = options[:x] ) && ( label_y = options[:y] )
-        end
 
-        label_x, label_y, label_width = @label.without_margins(label_x, label_y) unless options[:use_margin]
+        label_x, label_y = position_to_x_y(options)
 
-        [label_x, label_width].each { |measure| measure += options[:offset_x] } if options[:offset_x]
 
-        label_y += options[:offset_y] if options[:offset_y]
+        label_x, label_y, label_width = @label.without_margins(label_x, label_y, options[:offset_x]) unless options[:use_margin]
 
         [ label_x, label_y, label_width ]
       end
