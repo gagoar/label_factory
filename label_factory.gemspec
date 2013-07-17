@@ -18,7 +18,7 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
-  spec.add_dependency 'metaskills-pdf-writer'
+  spec.add_dependency 'eventioz-pdf-writer'
   spec.add_dependency 'xml-mapping' , '0.8.1'
   spec.add_dependency 'iconv'
 
