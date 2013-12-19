@@ -1,6 +1,7 @@
 require 'pdf/writer'
 require 'xml/mapping'
 require 'xml/mapping/base'
+require 'iconv'
 
 module LabelFactory
 
