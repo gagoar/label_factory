@@ -5,6 +5,7 @@ require 'label_factory'
 class TestPdfLabelBatch < Test::Unit::TestCase
   ROOT = File.expand_path(File.dirname(__FILE__) + "/../")
   def setup
+    @names = "Emilio Hernan\nTagua, Rodolfo\nKustermaan, Fernando\nCastellino, Diego\nCaliri Picon, María Valeria\nTagua, Pablo\nMampel Plaza, Pablo\nAquistapace, Romina Natalia\nVolpe, Andrea Cecilia\nOrsini, German Martin\nFrigerio, Claudia Marcela\nPeleitay, Alejandro Agustin\nAnfuso, Gonzalo Alejandro\nZalazar, Sebastian Lucas\nPadovan, Analía del Carmen\nBasualdo, Natalia Alejandra\nVasca, Eugenio\nMonforte, María Fernanda\nJacobo, Celina\nScafati, Pablo Yoel\nHauscarriague, Alfredo Jorge\nJury, María Emilia\nMartínez, Nestor\nCoppi, Pablo\nGutiérrez del Castillo".split(",")
   end
 
   def test_new_with_tempalte_name
@@ -132,13 +133,27 @@ class TestPdfLabelBatch < Test::Unit::TestCase
     end
   end
 
-  def test_eventioz_staff_labels
-    names = "Emilio Hernan\nTagua, Rodolfo\nKustermaan, Fernando\nCastellino, Diego\nCaliri Picon, María Valeria\nTagua, Pablo\nMampel Plaza, Pablo\nAquistapace, Romina Natalia\nVolpe, Andrea Cecilia\nOrsini, German Martin\nFrigerio, Claudia Marcela\nPeleitay, Alejandro Agustin\nAnfuso, Gonzalo Alejandro\nZalazar, Sebastian Lucas\nPadovan, Analía del Carmen\nBasualdo, Natalia Alejandra\nVasca, Eugenio\nMonforte, María Fernanda\nJacobo, Celina\nScafati, Pablo Yoel\nHauscarriague, Alfredo Jorge\nJury, María Emilia\nMartínez, Nestor\nCoppi, Pablo\nGutiérrez del Castillo".split(",")
-
+  def test_eventioz_staff_labels_6080
     p = LabelFactory::Batch::Base.new("Avery 6080")
     p.draw_boxes(false, true)
-    names.each_with_index { |name, i| p.add_label(name, position: i, justification: :center) }
+    @names.each_with_index { |name, i| p.add_label(name, position: i, justification: :center) }
 
-    p.save_as('eventiozStaff.pdf')
+    p.save_as('eventiozStuffLabels6080.pdf')
+  end
+
+  def test_eventioz_staff_labels_6081
+    p = LabelFactory::Batch::Base.new("Avery 6081")
+    p.draw_boxes(false, true)
+    @names.shuffle[0..19].each_with_index { |name, i| p.add_label(name, position: i, justification: :center) }
+
+    p.save_as('eventiozStuffLabels6081.pdf')
+  end
+
+  def test_eventioz_staff_labels_6082
+    p = LabelFactory::Batch::Base.new("Avery 6082")
+    p.draw_boxes(false, true)
+    @names.shuffle[0..13].each_with_index { |name, i| p.add_label(name, position: i, justification: :center) }
+
+    p.save_as('eventiozStuffLabels6082.pdf')
   end
 end
