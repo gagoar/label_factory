@@ -468,6 +468,36 @@
   </Template>
 
   <!-- =================================================================== -->
+  <!-- Avery 6080 family: Address Labels, 1'' x 2_5/8'', 30 per sheet    x -->
+  <!-- =================================================================== -->
+  <Template name="Avery 6080" size="US-Letter" _description="Address Labels">
+    <Label-rectangle id="0" width="2.68in" height="1.026in" round="0.0625in">
+      <Markup-margin size="0.00in"/>
+      <Layout nx="3" ny="10" x0="0.045in" y0="0.390in" dx="2.83in" dy="1.026in"/>
+    </Label-rectangle>
+  </Template>
+
+  <!-- =================================================================== -->
+  <!-- Avery 6081 family: Address Labels, 1'' x 4'', 20 per sheet    x -->
+  <!-- =================================================================== -->
+  <Template name="Avery 6081" size="US-Letter" _description="Address Labels">
+    <Label-rectangle id="0" width="4.100in" height="1.026in" round="0.0625in">
+      <Markup-margin size="0.00in"/>
+      <Layout nx="2" ny="10" x0="0.02in" y0="0.38in" dx="4.3in" dy="1.026in"/>
+    </Label-rectangle>
+  </Template>
+
+  <!-- =================================================================== -->
+  <!-- Avery 6082 family: Address Labels, 1'' x 4'', 14 per sheet    x -->
+  <!-- =================================================================== -->
+  <Template name="Avery 6082" size="US-Letter" _description="Address Labels">
+    <Label-rectangle id="0" width="4.100in" height="1.37in" round="0.0625in">
+      <Markup-margin size="0.00in"/>
+      <Layout nx="2" ny="7" x0="0.02in" y0="0.70in" dx="4.3in" dy="1.37in"/>
+    </Label-rectangle>
+  </Template>
+
+  <!-- =================================================================== -->
   <!-- Avery 8165 family: Full-page label, 8_1/2'' x 11'', 1 per sheet   x -->
   <!-- =================================================================== -->
   <Template name="Avery 8165" size="US-Letter" _description="Full Sheet Labels">
