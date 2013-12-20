@@ -3,6 +3,7 @@ module LabelFactory
     class Base
 
       DEFAULTS = { justification: :left, font_size: 12, font_type: 'Helvetica' }
+      CONVERTER = Iconv.new( 'ISO-8859-1//IGNORE//TRANSLIT', 'utf-8')
       attr_accessor :template, :label, :pdf, :manual_new_page
 
       @@gt = nil
@@ -84,8 +85,7 @@ module LabelFactory
         end
         opts ||= options
         @pdf.select_font options[:font_type] if options[:font_type]
-        text.force_encoding('UTF-8')
-        @pdf.text(text, opts)
+        @pdf.text(CONVERTER.iconv(text), opts)
         opts
       end
 
