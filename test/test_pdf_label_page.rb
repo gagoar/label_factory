@@ -1,10 +1,11 @@
-# encoding: utf-8
+# encoding: UTF-8
 require 'test/unit'
 require 'label_factory'
 
 class TestPdfLabelBatch < Test::Unit::TestCase
   ROOT = File.expand_path(File.dirname(__FILE__) + "/../")
   def setup
+    @staff_names = ["Dan Stark", "Pierce Morar II", "Casimer Runolfsson", "Bella Jacobi"]
   end
 
   def test_new_with_tempalte_name
@@ -36,22 +37,22 @@ class TestPdfLabelBatch < Test::Unit::TestCase
 
   def test_PdfLabelBatch_load_tempalte_set
     LabelFactory::Batch::Base.load_template_set("#{ROOT}/templates/avery-iso-templates.xml")
-     #Avery 7160 is found in avery-iso-templates
-     p = LabelFactory::Batch::Base.new("Avery 7160")
-     assert p
-     assert_equal p.pdf.page_width, 595.28
-     assert_equal p.pdf.page_height, 841.89
-     LabelFactory::Batch::Base.load_template_set("#{ROOT}/templates/avery-us-templates.xml")
-   end
+    #Avery 7160 is found in avery-iso-templates
+    p = LabelFactory::Batch::Base.new("Avery 7160")
+    assert p
+    assert_equal p.pdf.page_width, 595.28
+    assert_equal p.pdf.page_height, 841.89
+    LabelFactory::Batch::Base.load_template_set("#{ROOT}/templates/avery-us-templates.xml")
+  end
 
-   def test_PdfLabelBatch_all_template_names
-     #what happens if we havn't loaded a template yet?
-     t = LabelFactory::Batch::Base.all_template_names
-     assert t
-     assert_equal t.class, Array
-     assert_equal t.count, 292
-     assert_equal t.first, "Avery 5160"
-   end
+  def test_PdfLabelBatch_all_template_names
+    #what happens if we havn't loaded a template yet?
+    t = LabelFactory::Batch::Base.all_template_names
+    assert t
+    assert_equal t.class, Array
+    assert_equal t.count, 292
+    assert_equal t.first, "Avery 5160"
+  end
 
   def test_add_label_3_by_10
     p = LabelFactory::Batch::Base.new("Avery 8160") # label is 2 x 10
@@ -130,5 +131,32 @@ class TestPdfLabelBatch < Test::Unit::TestCase
       t.ny
       t.find_description
     end
+  end
+
+  def test_staff_pimaco_labels_6080
+    LabelFactory::Batch::Base.load_template_set('templates/pimaco-templates.xml')
+    p = LabelFactory::Batch::Base.new("Pimaco 6080")
+    p.draw_boxes(false, true)
+    @staff_names.each_with_index { |name, i| p.add_label(name, position: i, justification: :center) }
+
+    p.save_as("#{ROOT}/test_staff_pimaco_labels_6080.pdf")
+  end
+
+  def test_staff_pimaco_labels_6081
+    LabelFactory::Batch::Base.load_template_set('templates/pimaco-templates.xml')
+    p = LabelFactory::Batch::Base.new("Pimaco 6081")
+    p.draw_boxes(false, true)
+    @staff_names.shuffle[0..19].each_with_index { |name, i| p.add_label(name, position: i, justification: :center) }
+
+    p.save_as("#{ROOT}/test_staff_pimaco_labels_6081.pdf")
+  end
+
+  def test_staff_pimaco_labels_6082
+    LabelFactory::Batch::Base.load_template_set('templates/pimaco-templates.xml')
+    p = LabelFactory::Batch::Base.new("Pimaco 6082")
+    p.draw_boxes(false, true)
+    @staff_names.shuffle[0..13].each_with_index { |name, i| p.add_label(name, position: i, justification: :center) }
+
+    p.save_as("#{ROOT}/test_staff_pimaco_labels_6082.pdf")
   end
 end
