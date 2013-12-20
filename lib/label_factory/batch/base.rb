@@ -1,6 +1,8 @@
 module LabelFactory
   module Batch
     class Base
+      extend Forwardable
+      def_delegator :@layout, :labels_per_page
 
       DEFAULTS = { justification: :left, font_size: 12, font_type: 'Helvetica' }
       CONVERTER = Iconv.new( 'ISO-8859-1//IGNORE//TRANSLIT', 'utf-8')
