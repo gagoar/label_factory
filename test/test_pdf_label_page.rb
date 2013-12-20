@@ -5,6 +5,7 @@ require 'label_factory'
 class TestPdfLabelBatch < Test::Unit::TestCase
   ROOT = File.expand_path(File.dirname(__FILE__) + "/../")
   def setup
+    LabelFactory::Batch::Base.load_template_set
     @staff_names = ["Dan Stark", "Pierce Morar II", "Casimer Runolfsson", "Bella Jacobi"]
   end
 
@@ -158,5 +159,12 @@ class TestPdfLabelBatch < Test::Unit::TestCase
     @staff_names.each_with_index { |name, i| p.add_label(name, position: i, justification: :center) }
 
     p.save_as("#{ROOT}/test_staff_pimaco_labels_6082.pdf")
+  end
+
+  def test_get_labels_per_page
+    LabelFactory::Batch::Base.load_template_set('templates/pimaco-templates.xml')
+    p = LabelFactory::Batch::Base.new("Pimaco 6082")
+    assert p.labels_per_page
+    assert_equal 14, p.labels_per_page
   end
 end
