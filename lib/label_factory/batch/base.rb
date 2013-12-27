@@ -146,7 +146,12 @@ module LabelFactory
         @pdf.save_as(file_name)
       end
 
+      def render
+        @pdf.render
+      end
+
       private
+
 =begin rdoc
       To facilitate aligning a printer we give a method that prints the outlines of the labels
 =end
