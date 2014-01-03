@@ -66,3 +66,7 @@ this gem is inspirated in [PDF-labels](http://rubyforge.org/projects/pdf-labels/
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/gagoar/label_factory/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
