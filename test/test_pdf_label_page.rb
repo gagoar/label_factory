@@ -167,4 +167,10 @@ class TestPdfLabelBatch < Test::Unit::TestCase
     assert p.labels_per_page
     assert_equal 14, p.labels_per_page
   end
+
+  def test_staff_pimaco_labels_6082
+    p = LabelFactory::Batch::Base.new("Avery 8160")
+    p.add_label('123456789', position: 1, justification: :center, font_type: 'ArchonCode39Barcode')
+    p.save_as("#{ROOT}/test_barcode.pdf")
+  end
 end
